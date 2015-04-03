@@ -3,12 +3,24 @@ package com.sds.minion.agent.service.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sds.minion.agent.domain.AgentInfo;
 import com.sds.minion.agent.domain.AppStatus;
 import com.sds.minion.agent.run.DbChecker;
@@ -19,6 +31,10 @@ import com.sds.minion.agent.service.AppService;
 public class AppServiceImpl implements AppService {
 
   private AgentInfo agentInfo;
+  private Date timestamp;
+  private Properties agentProp;
+  private String appRootPath;
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   public AgentInfo getAgentInfo() {
@@ -26,18 +42,27 @@ public class AppServiceImpl implements AppService {
 	String cpu = HealInfo.getCpuUsage();
 	String disk = HealInfo.getDiskUsage();
     if(agentInfo != null){
+      reload();	
 	  agentInfo.setCpu(cpu);
 	  agentInfo.setMemory(memory);
       agentInfo.setDisk(disk);
       return agentInfo;
     }
+    String tmpPath=System.getProperty("avalon.root");
+    appRootPath = "C:/apps/alm/minion/prop";
+    if(tmpPath!=null){
+      appRootPath = tmpPath;
+    }
+    File f = new File(appRootPath+File.separator+"agent.properties");
+    agentProp=getProperity(f);
+
     agentInfo = new AgentInfo();
     agentInfo.setCpu(cpu);
     agentInfo.setMemory(memory);
     agentInfo.setDisk(disk);
-    agentInfo.setName("agent");
-    agentInfo.setPath("path");
-    agentInfo.setUrl("url");
+    agentInfo.setName(agentProp.getProperty("agent.name").toString());
+    agentInfo.setPath(agentProp.getProperty("agent.path").toString());
+    agentInfo.setUrl(agentProp.getProperty("agent.url").toString());
     return agentInfo;
   }
 
@@ -47,26 +72,61 @@ public class AppServiceImpl implements AppService {
   }
 
   public AppServiceImpl(){
-	  System.out.println("wowowowowwo");
+	agentInfo = getAgentInfo();
     reload();
+    checkinStart();
+    
   }
 
-  public void reload(){
-    agentInfo = getAgentInfo();
-    List<AppStatus> appStatusList = new LinkedList<AppStatus>();
+  private void checkinStart() {
+	  ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+      scheduler.scheduleAtFixedRate(new Runnable(){
+          public void run() {
+        	  agentInfo = getAgentInfo();
+        	  push(agentInfo);
+          }
+      }, 0, 15, TimeUnit.SECONDS);
+  }
+  
+  public void push(AgentInfo agentInfo) {
+      try {
+    	  HttpPost post = new HttpPost(agentProp.getProperty("merlin.url").toString()+"/checkIn");
+    	  post.setHeader(HTTP.CONTENT_TYPE,"application/json" );
+    	  
+    	  String json = objectMapper.writeValueAsString(agentInfo);
+		HttpEntity entity = new StringEntity(json, "UTF-8");
+		  post.setEntity(entity);
+    	  
+    	  HttpClient client = HttpClients.createDefault();
+          HttpResponse resp = client.execute(post);
+          System.out.println("push!!! = "+json);
+      } catch (Exception e) {
+          System.err.println(e.getMessage());
+      }
+  }
 
-    String tmpPath=System.getProperty("avalon.root");
-    String appRootPath = "C:/apps/alm/minion";
-    if(tmpPath!=null){
-      appRootPath = tmpPath;
+public void reload(){
+    Date now = new Date(); 
+    if(timestamp!=null){
+    	long gap=now.getTime()-timestamp.getTime();
+    	System.out.println("gap:"+gap);
+    	if(gap<60000){
+    		System.out.println("1분미미나.");
+    		return;
+    	}else{
+    		timestamp=now;
+    	}
+    }else{
+    	timestamp=now;
     }
+    List<AppStatus> appStatusList = new LinkedList<AppStatus>();
     File root = new File(appRootPath);
     if(!root.exists()){
       root.mkdirs();
     }
     File[] list = root.listFiles();
     for(File f : list){
-      if(isApp(f)){
+      if(isApp(appStatusList, f) && f.isFile()){
         appStatusList.add(loadApp(f));
         continue;
       }
@@ -75,15 +135,21 @@ public class AppServiceImpl implements AppService {
     System.out.println("load ok!");
   }
 
-  private boolean isApp(File f) {
-    if(f.isDirectory() == false){
-      return false;
+  private boolean isApp(List<AppStatus> appStatusList, File f) {
+    if(f.isDirectory() == true){
+		File[] list = f.listFiles();
+		for (File f2 : list) {
+			if (isApp(appStatusList, f2) && f2.isFile()) {
+				appStatusList.add(loadApp(f2));
+				continue;
+			}
+		}
+		return false;
     }
-    File[] list = f.listFiles();
-    for(File fChild: list){
-      if(fChild.getName().equals("app.properties")){
+    System.out.println("f.getName():"+f.getName());
+    if(f.getName().equals("app.properties")){
+    	System.out.println("return true!!!");
         return true;
-      }
     }
     return false;
   }
@@ -116,5 +182,12 @@ public class AppServiceImpl implements AppService {
 			e.printStackTrace();
 		}
 		return prop;
+	}
+	
+	public static void main(String[] args) throws InterruptedException {
+		System.out.println("start");
+		AppServiceImpl a = new AppServiceImpl();
+		Thread.sleep(10000);
+		a.reload();
 	}
 }
