@@ -1,22 +1,22 @@
+
 package com.sds.minion.agent.domain;
 
+import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
-public class AgentInfo {
-  String url;
-  String name;
-  String path;
-  String cpu;
-  String disk;
-  List<AppInfo> appInfoList;
+public class AgentInfo implements Serializable{
+
+  private static final long serialVersionUID = 1L;
   
-  public List<AppInfo> getAppInfoList() {
-    return appInfoList;
-  }
-  public void setAppInfoList(List<AppInfo> appInfoList) {
-    this.appInfoList = appInfoList;
-  }
-  public String getUrl() {
+  private String url;
+   private String name;
+   private String path;
+   private String cpu;
+   private String disk;
+   private List<AppStatus> apps = new LinkedList<>();
+   
+   public String getUrl() {
     return url;
   }
   public void setUrl(String url) {
@@ -46,5 +46,13 @@ public class AgentInfo {
   public void setDisk(String disk) {
     this.disk = disk;
   }
-  
+  public List<AppStatus> getApps() {
+    return apps;
+  }
+  public void setApps(List<AppStatus> apps) {
+    this.apps = apps;
+  }
+
 }
+
+   
