@@ -11,8 +11,17 @@ public class AppStatus implements Serializable{
   
   String name;
   String status;
+  String type;
 
-   public String getName() {
+   public String getType() {
+	return type;
+  }
+
+  public void setType(String type) {
+	this.type = type;
+  }
+
+  public String getName() {
     return name;
   }
 

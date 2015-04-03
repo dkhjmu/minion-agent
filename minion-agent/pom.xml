@@ -34,6 +34,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+          <groupId>com.tmax.tibero</groupId>
+          <artifactId>tibero-jdbc</artifactId>
+          <version>5.0</version>
+           <scope>system</scope>
+          <systemPath>C:\APPS\tibero5-jdbc.jar</systemPath>
+       </dependency>
 	</dependencies>
 
 

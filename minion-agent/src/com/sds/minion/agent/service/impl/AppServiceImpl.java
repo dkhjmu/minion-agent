@@ -1,25 +1,40 @@
 package com.sds.minion.agent.service.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+
+import org.springframework.stereotype.Repository;
 
 import com.sds.minion.agent.domain.AgentInfo;
 import com.sds.minion.agent.domain.AppStatus;
+import com.sds.minion.agent.run.DbChecker;
+import com.sds.minion.agent.run.WebChecker;
 import com.sds.minion.agent.service.AppService;
 
+@Repository("appService")
 public class AppServiceImpl implements AppService {
 
   private AgentInfo agentInfo;
 
   @Override
   public AgentInfo getAgentInfo() {
+	String memory = HealInfo.getMemoryUsage();
+	String cpu = HealInfo.getCpuUsage();
+	String disk = HealInfo.getDiskUsage();
     if(agentInfo != null){
+	  agentInfo.setCpu(cpu);
+	  agentInfo.setMemory(memory);
+      agentInfo.setDisk(disk);
       return agentInfo;
     }
     agentInfo = new AgentInfo();
-    agentInfo.setCpu("20%");
-    agentInfo.setDisk("100");
+    agentInfo.setCpu(cpu);
+    agentInfo.setMemory(memory);
+    agentInfo.setDisk(disk);
     agentInfo.setName("agent");
     agentInfo.setPath("path");
     agentInfo.setUrl("url");
@@ -32,6 +47,7 @@ public class AppServiceImpl implements AppService {
   }
 
   public AppServiceImpl(){
+	  System.out.println("wowowowowwo");
     reload();
   }
 
@@ -55,6 +71,7 @@ public class AppServiceImpl implements AppService {
         continue;
       }
     }
+    agentInfo.setApps(appStatusList);
     System.out.println("load ok!");
   }
 
@@ -72,8 +89,32 @@ public class AppServiceImpl implements AppService {
   }
 
   private AppStatus loadApp(File f) {
-    // app 상태 check, file 정보 읽어오기
-    AppStatus appStatus = new AppStatus("name", "DEAD");
+	 Properties prop=getProperity(f);
+	 String type = prop.get("app.health.type").toString();
+	 String check = prop.get("app.health.check").toString();
+	 String result = "";
+	 if(type.equals("db")){
+		 String userId = prop.get("app.health.check.userId").toString();
+		 String password = prop.get("app.health.check.password").toString();
+		 result=DbChecker.check(check, userId, password);
+	 }else if(type.equals("web")){
+		 result=WebChecker.check(check);
+	 }
+	 
+	AppStatus appStatus = new AppStatus(prop.get("app.name").toString(), result);
+	appStatus.setType(type);
     return appStatus;
   }
+
+	private Properties getProperity(File f) {
+		Properties prop = new Properties();
+	    InputStream inputStream;
+		try {
+			inputStream = new FileInputStream(f);
+			prop.load(inputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return prop;
+	}
 }
