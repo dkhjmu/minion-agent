@@ -1,71 +1,79 @@
 package com.sds.common;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class FileLogger {
-	File samFile = null;
-	FileWriter fw = null;
-	BufferedWriter bw = null;
-	FileOutputStream fos = null;
 	
-	public FileLogger(String filePath, String appName, boolean dateParam){
-		Date now = new Date();
-		Calendar cal=Calendar.getInstance();
-		cal.setTime(now);
+	private static final String newLine = System.getProperty("line.separator");
+	
+	String fullpath;
+	SimpleDateFormat sdf; 
+	SimpleDateFormat yyyy;
+	SimpleDateFormat ddd;
+	String dateValue;
+	private String filePath;
+	private String appName;
+	
+	public FileLogger(String filePath, String appName){
+		this.filePath=filePath;
+		this.appName=appName;
+		setFileFullPath(filePath, appName);
+	}
+
+	private void setFileFullPath(String filePath, String appName) {
 		if (!filePath.endsWith(File.separator)) {
 			filePath = filePath + File.separator;
 		}
-		if(dateParam==true){
-			filePath = filePath + File.separator + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH)+1) + File.separator ;
-		}
-		String fileName = appName+".log";
-		fileName = appName+"_"+cal.get(Calendar.DATE)+".log";
+		sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		yyyy=new SimpleDateFormat("yyyy-MM");
+		ddd=new SimpleDateFormat("dd");
+		
+		Date date = new Date();
+		filePath = filePath + File.separator + yyyy.format(date) + File.separator ;
+		dateValue = ddd.format(date);
+		String fileName = appName+"_"+dateValue+".log";
 
 		File samDir = new File(filePath);
 		System.out.println(filePath);
 		if (!samDir.exists()) {
 			samDir.mkdirs();
-			System.out.println("mkdirs");
 		}
-		samFile = new File(filePath + fileName);
-		try{
-			if (samFile.exists()) {
-				fw = new FileWriter(samFile);
-				bw = new BufferedWriter(fw);
-				fos = new FileOutputStream(samFile);
-			} else {
-				samFile.createNewFile();
-				fw = new FileWriter(samFile);
-				bw = new BufferedWriter(fw);
-				fos = new FileOutputStream(samFile);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		fullpath=filePath+File.separator+fileName;
+		System.out.println("fullpath:"+fullpath);
 	}
 	
-	public void log(String row) throws IOException {
-		try {
-			if (row == null)
-				row = "";
-			fos.write(row.getBytes("UTF-8"));
-			fos.write("\n".getBytes());
-		} catch (IOException ie) {
-			throw ie;
+	public void log(String row){
+		Date date = new Date();
+		if(dateValue != ddd.format(date)){
+			setFileFullPath(filePath, appName);
 		}
+	    PrintWriter printWriter = null;
+	    try {
+	    	File file = new File(fullpath);
+	        if (!file.exists()) file.createNewFile();
+	        printWriter = new PrintWriter(new FileOutputStream(fullpath, true));
+	        printWriter.write(sdf.format(new Date())+" "+row+newLine);
+	    } catch (IOException ioex) {
+	        ioex.printStackTrace();
+	    } finally {
+	        if (printWriter != null) {
+	            printWriter.flush();
+	            printWriter.close();
+	        }
+	    }
 	}
 	
 	
-//	public static void main(String[] args) throws IOException {
-//		FileLogger logger = new FileLogger("D:/log/", "scout", true);
-//		logger.log("test2");
-//		System.out.println("end~!");
-//	}
+	public static void main(String[] args) throws IOException {
+		FileLogger logger = new FileLogger("D:/log", "scout");
+		logger.log("test3333");
+		System.out.println("end~!");
+	}
 	
 }
