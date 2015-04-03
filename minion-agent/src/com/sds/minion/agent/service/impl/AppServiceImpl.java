@@ -1,115 +1,79 @@
 package com.sds.minion.agent.service.impl;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.sds.minion.agent.domain.AgentInfo;
+import com.sds.minion.agent.domain.AppStatus;
 import com.sds.minion.agent.service.AppService;
 
 public class AppServiceImpl implements AppService {
 
+  private AgentInfo agentInfo;
+
   @Override
   public AgentInfo getAgentInfo() {
-    // TODO Auto-generated method stub
-    return null;
+    if(agentInfo != null){
+      return agentInfo;
+    }
+    agentInfo = new AgentInfo();
+    agentInfo.setCpu("20%");
+    agentInfo.setDisk("100");
+    agentInfo.setName("agent");
+    agentInfo.setPath("path");
+    agentInfo.setUrl("url");
+    return agentInfo;
   }
 
   @Override
   public void runApp(String name, String run) {
     // TODO Auto-generated method stub
-    
   }
-  
-  static AppService appService;
-  
-  //ArrayList<GroupInfo> groups;
- // ArrayList<AppInfo> apps;
-  
-//public static void main(String[] args) {
-//    init();
-//}
-  
-  //test
-/*  private AppService(){
-      groups = new ArrayList<GroupInfo>();
-      apps = new ArrayList<AppInfo>();
-      
-      String tmpPath=System.getProperty("avalon.root");
-      String appRootPath = "D:/ALM/APPS";
-      if(tmpPath!=null){
-          appRootPath = tmpPath;
-      }
-      GroupInfo rootGroup = new GroupInfo("root", appRootPath);
-      File root = new File(appRootPath);
-      if(!root.exists()){
-          root.mkdirs();
-      }
-      File[] list = root.listFiles();
-      for(File f : list){
-          if(isApp(f)){
-              apps.add(loadApp(rootGroup, f));
-              continue;
-          }
-          if(isGroup(f)){
-              groups.add(loadGroup(rootGroup, f));
-          }
-      }
-      System.out.println("Loaded Group:"+groups.size());
-      System.out.println("Loaded Apps:"+apps.size());
-      System.out.println("load ok!");
-  }*/
-  
-/*  private GroupInfo loadGroup(GroupInfo parent, File f) {
-      GroupInfo group = new GroupInfo(parent.getName() + "/" + f.getName(), f.getAbsolutePath());
-      group.setParent(parent);
-      return group;
-  }*/
 
-/*  private AppInfo loadApp(GroupInfo group, File f) {
-      AppInfo app = new AppInfo(group.getName()+"/"+f.getName(), f.getAbsolutePath());
-      app.setParent(group);
-      return app;
-  }*/
+  public AppServiceImpl(){
+    reload();
+  }
+
+  public void reload(){
+    agentInfo = getAgentInfo();
+    List<AppStatus> appStatusList = new LinkedList<AppStatus>();
+
+    String tmpPath=System.getProperty("avalon.root");
+    String appRootPath = "C:/apps/alm/minion";
+    if(tmpPath!=null){
+      appRootPath = tmpPath;
+    }
+    File root = new File(appRootPath);
+    if(!root.exists()){
+      root.mkdirs();
+    }
+    File[] list = root.listFiles();
+    for(File f : list){
+      if(isApp(f)){
+        appStatusList.add(loadApp(f));
+        continue;
+      }
+    }
+    System.out.println("load ok!");
+  }
 
   private boolean isApp(File f) {
-      if(f.isDirectory() == false){
-          return false;
-      }
-      File[] list = f.listFiles();
-      for(File fChild: list){
-          if(fChild.getName().equals("app.properties")){
-              return true;
-          }
-      }
+    if(f.isDirectory() == false){
       return false;
+    }
+    File[] list = f.listFiles();
+    for(File fChild: list){
+      if(fChild.getName().equals("app.properties")){
+        return true;
+      }
+    }
+    return false;
   }
 
-  private boolean isGroup(File f) {
-      if(f.isDirectory() == false){
-          return false;
-      }
-      File[] list = f.listFiles();
-      for(File fChild: list){
-          if(fChild.getName().equals("group.properties")){
-              return true;
-          }
-      }
-      return false;
+  private AppStatus loadApp(File f) {
+    // app 상태 check, file 정보 읽어오기
+    AppStatus appStatus = new AppStatus("name", "DEAD");
+    return appStatus;
   }
-
-/*  public static void init(){
-      appService = new AppService();
-  }*/
-  
-/*  public static AppService getInstance(){
-      if(appService == null){
-          init();
-      }
-      return appService;
-  }*/
-
-/*  public List<AppInfo> allApps() {
-      return apps;
-  }*/
-  
-
 }
