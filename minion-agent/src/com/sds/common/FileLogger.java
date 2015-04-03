@@ -69,11 +69,4 @@ public class FileLogger {
 	    }
 	}
 	
-	
-	public static void main(String[] args) throws IOException {
-		FileLogger logger = new FileLogger("D:/log", "scout");
-		logger.log("test3333");
-		System.out.println("end~!");
-	}
-	
 }

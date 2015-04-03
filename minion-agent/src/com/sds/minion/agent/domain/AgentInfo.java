@@ -14,7 +14,14 @@ public class AgentInfo implements Serializable{
    private String path;
    private String cpu;
    private String disk;
-   private List<AppStatus> apps = new LinkedList<>();
+   private String memory;
+   public String getMemory() {
+	return memory;
+}
+public void setMemory(String memory) {
+	this.memory = memory;
+}
+private List<AppStatus> apps = new LinkedList<>();
    
    public String getUrl() {
     return url;
