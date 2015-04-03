@@ -15,6 +15,7 @@ public class WebChecker {
 			URL url = new URL(check);
 			conn = (HttpURLConnection) url.openConnection();
 			in = conn.getInputStream();
+			System.out.println(check);
 			return AppStatus.LIVED;
 		} catch (Exception ex) {
 			return AppStatus.DEAD;
