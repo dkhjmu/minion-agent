@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sds.minion.agent.domain.AgentInfo;
 import com.sds.minion.agent.domain.AppStatus;
 import com.sds.minion.agent.run.DbChecker;
+import com.sds.minion.agent.run.ProcessRunner;
 import com.sds.minion.agent.run.WebChecker;
 import com.sds.minion.agent.service.AppService;
 
@@ -35,6 +38,7 @@ public class AppServiceImpl implements AppService {
   private Properties agentProp;
   private String appRootPath;
   private ObjectMapper objectMapper = new ObjectMapper();
+  private Map<String, Properties> appProp = new HashMap<String, Properties>();
 
   @Override
   public AgentInfo getAgentInfo() {
@@ -68,7 +72,38 @@ public class AppServiceImpl implements AppService {
 
   @Override
   public void runApp(String name, String run) {
-    // TODO Auto-generated method stub
+	//run : start, stop, restart
+	Properties prop = appProp.get(name);
+	String cmd="";
+	if(run.equals("stop")){
+		if(ProcessRunner.isWindows()){
+			cmd = prop.get("app.run.window.stop").toString();
+		}else{
+			cmd = prop.get("app.run.stop").toString();
+		}
+	}else if(run.equals("start")){
+		if(ProcessRunner.isWindows()){
+			cmd = prop.get("app.run.window.start").toString();
+		}else{
+			cmd = prop.get("app.run.start").toString();
+		}
+	}else{
+		if(ProcessRunner.isWindows()){
+			cmd = prop.get("app.run.window.stop").toString();
+		}else{
+			cmd = prop.get("app.run.stop").toString();
+		}
+		ProcessRunner r = new ProcessRunner();
+		r.runProcess(cmd, true);
+		if(ProcessRunner.isWindows()){
+			cmd = prop.get("app.run.window.start").toString();
+		}else{
+			cmd = prop.get("app.run.start").toString();
+		}
+	}
+	ProcessRunner r = new ProcessRunner();
+	r.runProcess(cmd);
+	  
   }
 
   public AppServiceImpl(){
@@ -156,6 +191,7 @@ public void reload(){
 
   private AppStatus loadApp(File f) {
 	 Properties prop=getProperity(f);
+	 appProp.put(prop.get("app.name").toString(), prop);
 	 String type = prop.get("app.health.type").toString();
 	 String check = prop.get("app.health.check").toString();
 	 String result = "";
@@ -189,5 +225,6 @@ public void reload(){
 		AppServiceImpl a = new AppServiceImpl();
 		Thread.sleep(10000);
 		a.reload();
+		a.runApp("scout", "restart");
 	}
 }
