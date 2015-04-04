@@ -144,9 +144,9 @@ public void reload(){
     Date now = new Date(); 
     if(timestamp!=null){
     	long gap=now.getTime()-timestamp.getTime();
-    	System.out.println("gap:"+gap);
+    	//System.out.println("gap:"+gap);
     	if(gap<60000){
-    		System.out.println("1분미미나.");
+    		//System.out.println("1분미미나.");
     		return;
     	}else{
     		timestamp=now;
@@ -183,7 +183,7 @@ public void reload(){
     }
     System.out.println("f.getName():"+f.getName());
     if(f.getName().equals("app.properties")){
-    	System.out.println("return true!!!");
+    	//System.out.println("return true!!!");
         return true;
     }
     return false;
