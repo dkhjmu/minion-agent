@@ -1,6 +1,7 @@
 package com.sds.minion.agent.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sds.common.PropertyUtils;
 import com.sds.minion.agent.domain.AgentInfo;
 import com.sds.minion.agent.domain.AppStatus;
 import com.sds.minion.agent.run.DbChecker;
@@ -35,6 +36,7 @@ public class AppServiceImpl implements AppService {
     private String appRootPath;
     private ObjectMapper objectMapper = new ObjectMapper();
     private Map<String, Properties> appProp = new HashMap<String, Properties>();
+    private final int PUSH_INTERVAL = Integer.parseInt(PropertyUtils.getProperty("minion.push.interval"));
 
     @Override
     public AgentInfo getAgentInfo() {
@@ -113,7 +115,7 @@ public class AppServiceImpl implements AppService {
                 agentInfo = getAgentInfo();
                 push(agentInfo);
             }
-        }, 0, 15, TimeUnit.SECONDS);
+        }, 0, PUSH_INTERVAL, TimeUnit.SECONDS);
     }
 
     public void push(AgentInfo agentInfo) {
