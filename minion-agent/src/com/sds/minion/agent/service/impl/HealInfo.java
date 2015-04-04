@@ -24,8 +24,7 @@ public class HealInfo {
 	}
 	
 	public static String getCpuUsage(){
-		double cpu = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
-		return String.valueOf(cpu);
+		return Runtime.getRuntime().availableProcessors()+"";
 	}
 	
 	public static String getDiskUsage(){
