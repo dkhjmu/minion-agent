@@ -39,7 +39,7 @@
           <artifactId>tibero-jdbc</artifactId>
           <version>5.0</version>
            <scope>system</scope>
-          <systemPath>C:\APPS\tibero5-jdbc.jar</systemPath>
+          <systemPath>${basedir}/lib/tibero5-jdbc.jar</systemPath>
        </dependency>
        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
