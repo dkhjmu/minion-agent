@@ -129,7 +129,7 @@ public class AppServiceImpl implements AppService {
     	  post.setHeader(HTTP.CONTENT_TYPE,"application/json" );
     	  
     	  String json = objectMapper.writeValueAsString(agentInfo);
-		HttpEntity entity = new StringEntity(json, "UTF-8");
+    	  HttpEntity entity = new StringEntity(json, "UTF-8");
 		  post.setEntity(entity);
     	  
     	  HttpClient client = HttpClients.createDefault();
@@ -201,6 +201,10 @@ public void reload(){
 		 result=DbChecker.check(check, userId, password);
 	 }else if(type.equals("web")){
 		 result=WebChecker.check(check);
+	 }
+	 
+	 if(result.equals(AppStatus.DEAD) && prop.get("app.run.auto").toString().equals("true")){
+		 runApp(prop.get("app.name").toString(), "start");
 	 }
 	 
 	AppStatus appStatus = new AppStatus(prop.get("app.name").toString(), result);
