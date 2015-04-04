@@ -113,7 +113,7 @@ public class AppServiceImpl implements AppService {
                 agentInfo = getAgentInfo();
                 push(agentInfo);
             }
-        }, 0, 15, TimeUnit.SECONDS);
+        }, 0, 5, TimeUnit.SECONDS);
     }
 
     public void push(AgentInfo agentInfo) {
