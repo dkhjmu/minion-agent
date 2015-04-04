@@ -193,6 +193,10 @@ public class AppServiceImpl implements AppService {
         } else if (type.equals("web")) {
             result = WebChecker.check(check);
         }
+        
+        if(result.equals(AppStatus.DEAD) && prop.get("app.run.auto").toString().equals("true")){
+        	runApp(prop.get("app.name").toString(), "restart");
+   	 	}
 
         AppStatus appStatus = new AppStatus(prop.get("app.name").toString(), result);
         appStatus.setType(type);
