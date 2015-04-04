@@ -138,7 +138,7 @@ public class AppServiceImpl implements AppService {
         if (timestamp != null) {
             long gap = now.getTime() - timestamp.getTime();
 //            System.out.println("gap:" + gap);
-            if (gap < 60000) {
+            if (gap < 1000) {
 //                System.out.println("1분미미나.");
                 return;
             } else {
@@ -160,7 +160,7 @@ public class AppServiceImpl implements AppService {
             }
         }
         agentInfo.setApps(appStatusList);
-        System.out.println("load ok!");
+        //System.out.println("load ok!");
     }
     private boolean isApp(List<AppStatus> appStatusList, File f) {
         if(f.isDirectory() == true){
@@ -173,7 +173,7 @@ public class AppServiceImpl implements AppService {
             }
             return false;
         }
-        System.out.println("f.getName():"+f.getName());
+        //System.out.println("f.getName():"+f.getName());
         if(f.getName().equals("app.properties")){
             //System.out.println("return true!!!");
             return true;
