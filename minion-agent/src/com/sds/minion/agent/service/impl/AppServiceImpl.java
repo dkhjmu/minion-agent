@@ -162,24 +162,12 @@ public class AppServiceImpl implements AppService {
         agentInfo.setApps(appStatusList);
         System.out.println("load ok!");
     }
-
-    private boolean isApp(List<AppStatus> appStatusList, File f) {
-        if (f.isDirectory() == true) {
-            File[] list = f.listFiles();
-            for (File f2 : list) {
-                if (isApp(appStatusList, f2) && f2.isFile()) {
-                    appStatusList.add(loadApp(f2));
-                    continue;
-                }
-            }
-            return false;
-        }
-        System.out.println("f.getName():" + f.getName());
-        if (f.getName().equals("app.properties")) {
-            System.out.println("return true!!!");
-            return true;
-        }
-        return false;
+    File[] list = root.listFiles();
+    for(File f : list){
+      if(isApp(appStatusList, f) && f.isFile()){
+        appStatusList.add(loadApp(f));
+        continue;
+      }
     }
 
     private AppStatus loadApp(File f) {
