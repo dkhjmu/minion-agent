@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 public class FileLogger {
@@ -21,34 +20,37 @@ public class FileLogger {
 	private String appName;
 	
 	public FileLogger(String filePath, String appName){
-		this.filePath=filePath;
 		this.appName=appName;
-		setFileFullPath(filePath, appName);
+		this.filePath=filePath;
+		sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		yyyy=new SimpleDateFormat("yyyy-MM");
+		ddd=new SimpleDateFormat("dd");
+		if(!filePath.equals("EMPTY")){
+			setFileFullPath(filePath, appName);
+		}
 	}
 
 	private void setFileFullPath(String filePath, String appName) {
 		if (!filePath.endsWith(File.separator)) {
 			filePath = filePath + File.separator;
 		}
-		sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		yyyy=new SimpleDateFormat("yyyy-MM");
-		ddd=new SimpleDateFormat("dd");
-		
 		Date date = new Date();
 		filePath = filePath + File.separator + yyyy.format(date) + File.separator ;
 		dateValue = ddd.format(date);
-		String fileName = appName+"_"+dateValue+".log";
+		String fileName = dateValue+".log";
 
 		File samDir = new File(filePath);
-		System.out.println(filePath);
 		if (!samDir.exists()) {
 			samDir.mkdirs();
 		}
 		fullpath=filePath+File.separator+fileName;
-		System.out.println("fullpath:"+fullpath);
 	}
 	
 	public void log(String row){
+		if(filePath.equals("EMPTY")){
+			System.out.println(sdf.format(new Date())+" "+row+newLine);
+			return;
+		}
 		Date date = new Date();
 		if(dateValue != ddd.format(date)){
 			setFileFullPath(filePath, appName);
@@ -68,5 +70,4 @@ public class FileLogger {
 	        }
 	    }
 	}
-	
 }

@@ -2,7 +2,6 @@ package com.sds.minion.agent.web;
 
 import javax.annotation.Resource;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,5 +17,11 @@ public class StatusController {
 	@RequestMapping("/status")
     public AgentInfo status() {
         return appService.getAgentInfo();
+    }
+	
+	@RequestMapping("/stop")
+    public void stop() {
+		System.exit(0);
+        return ;
     }
 }

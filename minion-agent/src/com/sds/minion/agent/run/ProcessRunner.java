@@ -2,7 +2,6 @@ package com.sds.minion.agent.run;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 public class ProcessRunner {
 
@@ -42,11 +41,4 @@ public class ProcessRunner {
 			e.printStackTrace();
 		}
 	}
-
-    public static void main(String... args) throws InterruptedException {
-        ProcessRunner processRunner = new ProcessRunner();
-        processRunner.runProcess("d:/dev/apache-tomcat-7.0.47/bin", "startup.bat", false);
-        Thread.sleep(10000);
-
-    }
 }
