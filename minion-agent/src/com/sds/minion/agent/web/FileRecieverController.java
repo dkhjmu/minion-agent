@@ -6,24 +6,23 @@ import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-
-@SuppressWarnings("serial")
-@WebServlet("/recieve")
+@Controller
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2)
 public class FileRecieverController {
-  
+
+  @RequestMapping(value="/upload", method=RequestMethod.POST)
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    //String savePath = request.getHeader("dest"); //목적지입니다.
-    String savePath = "D:/tmp/";
+    String savePath = request.getHeader("dest"); 
     savePath = savePath.replace("\\\\", "/");
     File fileSaveDir = new File(savePath);
     if (!fileSaveDir.exists()) {

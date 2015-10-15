@@ -18,7 +18,7 @@ public class RunController {
     public String index(@PathVariable String appName, @PathVariable String runType) {
 		System.out.println("appName:"+appName);
 		System.out.println("runType:"+runType);
-		appService.runApp(appName, runType);
-        return "{ \"result\":\"OK\" }";
+		String result = appService.runApp(appName, runType);
+        return "{ \"result\":\""+result+"\" }";
     }
 }

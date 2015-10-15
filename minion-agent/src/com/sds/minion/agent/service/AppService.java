@@ -6,6 +6,6 @@ public interface AppService {
   
   public AgentInfo getAgentInfo();
   
-  public void runApp(String name, String run);
+  public String runApp(String name, String run);
   
 }
