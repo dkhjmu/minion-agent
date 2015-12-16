@@ -45,13 +45,13 @@ public class AppServiceImpl implements AppService {
   private String appRootPath;
   private ObjectMapper objectMapper = new ObjectMapper();
   private Map<String, Properties> appProp = new HashMap<String, Properties>();
-  public static int PUSH_INTERVAL = 180;
+  public static int PUSH_INTERVAL = 60;
 
   static {
     try {
       PUSH_INTERVAL = Integer.parseInt(PropertyUtils.getProperty("minion.push.interval"));
     } catch (Exception e) {
-      PUSH_INTERVAL = 180;
+      PUSH_INTERVAL = 60;
     }
   }
 
@@ -183,7 +183,7 @@ public class AppServiceImpl implements AppService {
     Date now = new Date();
     if (timestamp != null) {
       long gap = now.getTime() - timestamp.getTime();
-      if (gap < 60000) { // 이전체크가 60 미만이면 안한다.
+      if (gap < 180000) { // 이전체크가 60 미만이면 안한다.
         return;
       } else {
         timestamp = now;
@@ -244,7 +244,7 @@ public class AppServiceImpl implements AppService {
     } else if (type.equals("web")) {
       result = WebChecker.check(check);
     } else if (type.equals("ALM")) {
-      result = ALMChecker.check(appName);
+      result = ALMChecker.check(appName, check);
     }
     logger.log(appName + "\t Check Result:" + result);
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -252,6 +252,7 @@ public class AppServiceImpl implements AppService {
 
     if (result.equals(AppStatus.DEAD) && prop.get("app.run.auto").toString().equals("true")) {
       logger.log(appName + "\t AutoRun:Restart");
+      System.out.println(sdf.format(new Date()) + "\t AutoRun:Restart");
       runApp(appName, "restart");
     }
 
