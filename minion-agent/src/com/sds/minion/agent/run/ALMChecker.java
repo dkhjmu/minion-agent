@@ -24,9 +24,9 @@ public class ALMChecker {
 			String result = checkWAS(url);
 			logger.log(appName+"\t WAS Result:"+result);
 	        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	        System.out.println(sdf.format(new Date()) + " " + appName+"\t WAS Result:"+result);
+	        //System.out.println(sdf.format(new Date()) + " " + appName+"\t WAS Result:"+result);
 	        // /rest/projectInfo/get/
-	        result = checkWAS(url+"/rest/projectInfo/get/administrator");
+	        result = sendRequestGetToGoServer(url+"/rest/projectInfo/get/administrator");
 	        
 	        if(!result.equals(AppStatus.DEAD)){
 	        	ObjectMapper mapper = new ObjectMapper();
@@ -42,11 +42,11 @@ public class ALMChecker {
 			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			//send mail
 			String json = "{ \"sender\": \"hjmu.kang@samsung.com\", \"receivers\": [\"hjmu.kang\"], \"title\": \""
-		        + "[OpenALM] " + sdf.format(new Date()) + " 서버 이상 발생! "  
+		        + "[OpenALM] " + sdf.format(new Date()) + "  " + appName + " 서버 이상 발생! "  
 		        + "\","
 		        + " \"content\": \""
 		        + "<p>" + sdf.format(new Date()) + "</p>"
-		        + "<p>서버에 이상이 감지 되었습니다! 확인해주세요!</p>\""
+		        + "<p>"+ appName +"("+url+") 서버에 이상이 감지 되었습니다! 확인해주세요!</p>\""
 		        + "   }";
 		    sendRequestPostToGoServer("http://70.121.224.24:9090/scout/remote/singlemails?auth=pass", json );
 			
@@ -66,7 +66,7 @@ public class ALMChecker {
 			String inputLine;
 			StringBuffer sb=new StringBuffer();
 	        while ((inputLine = br.readLine()) != null){ 
-	            System.out.println(inputLine);
+//	            System.out.println(inputLine);
 	            sb.append(inputLine);
 	        }
 			if(sb.toString().equals("")){
@@ -113,6 +113,37 @@ public class ALMChecker {
 	    }
 	  }
 	
+	public static String sendRequestGetToGoServer(String urlStr) throws Exception{
+	    StringBuffer result = new StringBuffer();
+	    HttpURLConnection conn = null;
+	    try {
+	      URL url = new URL(urlStr);
+	      conn = (HttpURLConnection) url.openConnection();
+	      conn.setRequestMethod("GET");
+	      conn.setRequestProperty("Accept", "application/json");
+	      if (conn.getResponseCode() != 200) {
+	          throw new RuntimeException("Failed : HTTP error code : "
+	                  + conn.getResponseCode());
+	      }
+	      BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+	      String output = null;
+	      while ((output = br.readLine()) != null) {
+//	          System.out.println(output);
+	          result.append(output);
+	      }
+	      conn.disconnect();
+	    } catch (Exception e) {
+	      System.out.println(e.toString());
+	      throw e;
+	    }finally{
+	      if(conn!=null){
+	        conn.disconnect();
+	      }
+	    }
+	    return result.toString();
+	  }
 	
-	
+	public static void main(String[] args) {
+	  check("scout1", "http://70.121.224.24:9393/scout");
+    }
 }

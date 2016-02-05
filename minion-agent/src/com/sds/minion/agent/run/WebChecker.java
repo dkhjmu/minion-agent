@@ -16,6 +16,8 @@ public class WebChecker {
 		try {
 			URL url = new URL(check);
 			conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
 			in = conn.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 //			String inputLine;
