@@ -142,8 +142,4 @@ public class ALMChecker {
 	    }
 	    return result.toString();
 	  }
-	
-	public static void main(String[] args) {
-	  check("scout1", "http://70.121.224.24:9393/scout");
-    }
 }
